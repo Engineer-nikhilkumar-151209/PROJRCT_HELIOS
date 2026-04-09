@@ -29,7 +29,6 @@
     cursor: crosshair;
   }
 
-  /* Grid background */
   body::before {
     content: '';
     position: fixed;
@@ -42,7 +41,6 @@
     z-index: 0;
   }
 
-  /* Glow orbs */
   .orb {
     position: fixed;
     border-radius: 50%;
@@ -62,7 +60,6 @@
     padding: 40px 24px 80px;
   }
 
-  /* Header */
   header {
     display: flex;
     align-items: flex-end;
@@ -93,10 +90,7 @@
     animation: cursorBlink 0.75s step-end infinite;
   }
   .logo-cursor.hide { opacity: 0; animation: none; }
-  @keyframes cursorBlink {
-    0%,100% { opacity: 1; }
-    50%     { opacity: 0; }
-  }
+  @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
   .logo-sub {
     font-family: 'Space Mono', monospace;
     font-size: 0.65rem;
@@ -114,11 +108,8 @@
     padding: 4px 10px;
     animation: blink 2s step-end infinite;
   }
-  @keyframes blink {
-    0%,100%{opacity:1} 50%{opacity:0.3}
-  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* Hero tag */
   .hero-tag {
     font-family: 'Syne', sans-serif;
     font-size: clamp(2rem, 7vw, 4.5rem);
@@ -137,7 +128,6 @@
     line-height: 1.7;
   }
 
-  /* Upload zone */
   .upload-zone {
     border: 2px dashed var(--border);
     background: var(--surface);
@@ -159,12 +149,7 @@
     border-color: var(--accent);
     background: rgba(0,255,136,0.03);
   }
-  .upload-icon {
-    font-size: 2.5rem;
-    display: block;
-    margin-bottom: 16px;
-    opacity: 0.6;
-  }
+  .upload-icon { font-size: 2.5rem; display: block; margin-bottom: 16px; opacity: 0.6; }
   .upload-zone h3 {
     font-family: 'Syne', sans-serif;
     font-size: 1.2rem;
@@ -172,12 +157,7 @@
     margin-bottom: 8px;
     color: var(--text);
   }
-  .upload-zone p {
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    line-height: 1.8;
-  }
+  .upload-zone p { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; line-height: 1.8; }
   .upload-zone input[type="file"] {
     position: absolute;
     inset: 0;
@@ -186,13 +166,7 @@
     width: 100%;
     height: 100%;
   }
-  .file-types {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
+  .file-types { display: flex; gap: 8px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
   .ft-tag {
     font-size: 0.6rem;
     letter-spacing: 0.1em;
@@ -202,7 +176,6 @@
     padding: 3px 8px;
   }
 
-  /* Text input fallback */
   .divider {
     display: flex;
     align-items: center;
@@ -213,12 +186,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
   textarea {
     width: 100%;
@@ -237,7 +205,6 @@
   textarea:focus { border-color: var(--accent3); }
   textarea::placeholder { color: var(--muted); }
 
-  /* Analyze button */
   .btn-analyze {
     width: 100%;
     background: var(--accent);
@@ -265,14 +232,9 @@
   }
   .btn-analyze:hover::after { left: 100%; }
   .btn-analyze:hover { background: #00ffaa; }
-  .btn-analyze:disabled {
-    background: var(--border);
-    color: var(--muted);
-    cursor: not-allowed;
-  }
+  .btn-analyze:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
   .btn-analyze:disabled::after { display: none; }
 
-  /* File preview */
   .file-preview {
     display: none;
     margin-top: 16px;
@@ -289,7 +251,6 @@
   .file-preview .fsize { color: var(--muted); flex-shrink: 0; }
   .remove-file { cursor: pointer; color: var(--accent2); font-size: 1rem; flex-shrink: 0; }
 
-  /* Loader */
   .loader-wrap {
     display: none;
     flex-direction: column;
@@ -298,11 +259,7 @@
     gap: 20px;
   }
   .loader-wrap.show { display: flex; }
-  .loader {
-    width: 60px;
-    height: 60px;
-    position: relative;
-  }
+  .loader { width: 60px; height: 60px; position: relative; }
   .loader::before, .loader::after {
     content: '';
     position: absolute;
@@ -310,15 +267,8 @@
     border: 2px solid transparent;
     border-radius: 50%;
   }
-  .loader::before {
-    border-top-color: var(--accent);
-    animation: spin 0.9s linear infinite;
-  }
-  .loader::after {
-    border-bottom-color: var(--accent3);
-    animation: spin 1.5s linear infinite reverse;
-    inset: 8px;
-  }
+  .loader::before { border-top-color: var(--accent); animation: spin 0.9s linear infinite; }
+  .loader::after { border-bottom-color: var(--accent3); animation: spin 1.5s linear infinite reverse; inset: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loader-text {
     font-size: 0.72rem;
@@ -329,17 +279,9 @@
   }
   @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
 
-  /* Results panel */
-  .results {
-    display: none;
-    margin-top: 40px;
-    animation: fadeUp 0.5s ease forwards;
-  }
+  .results { display: none; margin-top: 40px; animation: fadeUp 0.5s ease forwards; }
   .results.show { display: block; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
   .result-header {
     display: flex;
@@ -361,16 +303,9 @@
   .verdict-badge.ai { background: var(--accent2); color: #fff; }
   .verdict-badge.human { background: var(--accent); color: #000; }
   .verdict-badge.mixed { background: var(--accent3); color: #fff; }
-  .result-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 800;
-  }
+  .result-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
 
-  /* Confidence meter */
-  .confidence-wrap {
-    margin-bottom: 28px;
-  }
+  .confidence-wrap { margin-bottom: 28px; }
   .conf-label {
     display: flex;
     justify-content: space-between;
@@ -380,22 +315,12 @@
     color: var(--muted);
     margin-bottom: 10px;
   }
-  .conf-track {
-    height: 6px;
-    background: var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-  .conf-fill {
-    height: 100%;
-    width: 0%;
-    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-  }
+  .conf-track { height: 6px; background: var(--border); position: relative; overflow: hidden; }
+  .conf-fill { height: 100%; width: 0%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
   .conf-fill.ai { background: linear-gradient(90deg, var(--accent2), #ff6699); }
   .conf-fill.human { background: linear-gradient(90deg, var(--accent3), var(--accent)); }
   .conf-fill.mixed { background: linear-gradient(90deg, var(--accent3), var(--accent2)); }
 
-  /* Signal grid */
   .signals {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -409,33 +334,16 @@
     position: relative;
     overflow: hidden;
   }
-  .signal-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px;
-    height: 100%;
-  }
+  .signal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
   .signal-card.red::before { background: var(--accent2); }
   .signal-card.green::before { background: var(--accent); }
   .signal-card.yellow::before { background: #ffcc00; }
-  .signal-card .s-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .signal-card .s-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-  }
+  .signal-card .s-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .signal-card .s-val { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
   .signal-card.red .s-val { color: var(--accent2); }
   .signal-card.green .s-val { color: var(--accent); }
   .signal-card.yellow .s-val { color: #ffcc00; }
 
-  /* Analysis body */
   .analysis-body {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -454,7 +362,6 @@
     margin-bottom: 12px;
   }
 
-  /* Reset */
   .btn-reset {
     background: none;
     border: 1px solid var(--border);
@@ -470,7 +377,6 @@
   }
   .btn-reset:hover { border-color: var(--accent3); color: var(--text); }
 
-  /* Error */
   .error-box {
     display: none;
     background: rgba(255,51,102,0.08);
@@ -483,7 +389,6 @@
   }
   .error-box.show { display: block; }
 
-  /* Footer */
   footer {
     text-align: center;
     margin-top: 80px;
@@ -495,37 +400,19 @@
     text-transform: uppercase;
   }
 
-  /* ── Sun Logo ─────────────────────────────────────────── */
-  .sun-logo {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .sun-svg-wrap {
-    position: relative;
-    width: 58px;
-    height: 58px;
-    flex-shrink: 0;
-  }
-  .sun-svg {
-    width: 58px;
-    height: 58px;
-    overflow: visible;
-  }
+  /* Sun Logo */
+  .sun-logo { display: flex; align-items: center; gap: 14px; }
+  .sun-svg-wrap { position: relative; width: 58px; height: 58px; flex-shrink: 0; }
+  .sun-svg { width: 58px; height: 58px; overflow: visible; }
 
-  /* Core circle fills in first */
   .sun-core {
     fill: #FFD700;
     r: 0;
     transform-origin: 29px 29px;
     animation: coreGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s forwards;
   }
-  @keyframes coreGrow {
-    from { r: 0; opacity: 0; }
-    to   { r: 11; opacity: 1; }
-  }
+  @keyframes coreGrow { from{r:0;opacity:0} to{r:11;opacity:1} }
 
-  /* Rays — each is a <line>, drawn right after core */
   .sun-ray {
     stroke: #FFD700;
     stroke-linecap: round;
@@ -533,42 +420,30 @@
     opacity: 0;
     transform-origin: 29px 29px;
   }
-  /* 8 rays, staggered entry */
-  .sun-ray:nth-child(1)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.55s forwards; }
-  .sun-ray:nth-child(2)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.65s forwards; }
-  .sun-ray:nth-child(3)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.75s forwards; }
-  .sun-ray:nth-child(4)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.85s forwards; }
-  .sun-ray:nth-child(5)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.95s forwards; }
-  .sun-ray:nth-child(6)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.05s forwards; }
-  .sun-ray:nth-child(7)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.15s forwards; }
-  .sun-ray:nth-child(8)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.25s forwards; }
+  .sun-ray:nth-child(1) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.55s forwards; }
+  .sun-ray:nth-child(2) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.65s forwards; }
+  .sun-ray:nth-child(3) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.75s forwards; }
+  .sun-ray:nth-child(4) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.85s forwards; }
+  .sun-ray:nth-child(5) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.95s forwards; }
+  .sun-ray:nth-child(6) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.05s forwards; }
+  .sun-ray:nth-child(7) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.15s forwards; }
+  .sun-ray:nth-child(8) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.25s forwards; }
   @keyframes rayGrow {
-    0%   { opacity: 0; stroke-dasharray: 0 12; stroke-dashoffset: 0; }
-    60%  { opacity: 1; }
-    100% { opacity: 1; stroke-dasharray: 12 0; }
+    0%   { opacity:0; stroke-dasharray:0 12; stroke-dashoffset:0; }
+    60%  { opacity:1; }
+    100% { opacity:1; stroke-dasharray:12 0; }
   }
 
-  /* Idle slow spin after full reveal */
-  .sun-rays-group {
-    transform-origin: 29px 29px;
-    animation: sunSpin 18s linear 1.8s infinite;
-  }
-  @keyframes sunSpin {
-    to { transform: rotate(360deg); }
-  }
+  .sun-rays-group { transform-origin: 29px 29px; animation: sunSpin 18s linear 1.8s infinite; }
+  @keyframes sunSpin { to { transform: rotate(360deg); } }
 
-  /* Continuous gentle pulse on core */
   .sun-core-anim {
     transform-origin: 29px 29px;
     animation: coreGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s forwards,
                corePulse 3s ease-in-out 1.8s infinite;
   }
-  @keyframes corePulse {
-    0%,100% { opacity: 1; }
-    50%     { opacity: 0.7; }
-  }
+  @keyframes corePulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
 
-  /* Yellow glow under the svg */
   .sun-svg-wrap::after {
     content: '';
     position: absolute;
@@ -580,9 +455,7 @@
     animation: glowIn 0.8s ease 1.4s forwards;
     z-index: -1;
   }
-  @keyframes glowIn {
-    to { opacity: 0.28; }
-  }
+  @keyframes glowIn { to { opacity: 0.28; } }
 
   @media(max-width:600px){
     .hero-tag { font-size: 2.2rem; }
@@ -684,7 +557,7 @@
         <span id="confPct">—</span>
       </div>
       <div class="conf-track">
-        <div class="conf-fill ai" id="confBar"></div>
+        <div class="conf-fill" id="confBar"></div>
       </div>
     </div>
 
@@ -695,14 +568,29 @@
       <div id="analysisText"></div>
     </div>
 
-    <button class="btn-reset" onclick="reset()">↺ Analyze Another</button>
+    <button class="btn-reset" onclick="resetApp()">↺ Analyze Another</button>
   </div>
 
-
+  <footer>
+    Project Helios v1.0 — K.A.I Laboratories &nbsp;·&nbsp; Forensic AI Detection Engine
+  </footer>
 </div>
 
 <script>
-  // ─── State ─────────────────────────────────────────────────────────────────
+  // ─── Logo typewriter ────────────────────────────────────────────────────────
+  const LOGO_TEXT = 'PROJECT HELIOS';
+  const logoTyped = document.getElementById('logoTyped');
+  const logoCursor = document.getElementById('logoCursor');
+  let li = 0;
+  const typeInterval = setInterval(() => {
+    logoTyped.textContent += LOGO_TEXT[li++];
+    if (li >= LOGO_TEXT.length) {
+      clearInterval(typeInterval);
+      setTimeout(() => logoCursor.classList.add('hide'), 1200);
+    }
+  }, 100);
+
+  // ─── State ──────────────────────────────────────────────────────────────────
   let uploadedFile = null;
   const loaderMessages = [
     "Initializing forensics engine...",
@@ -716,35 +604,11 @@
   ];
 
   // ─── File handling ──────────────────────────────────────────────────────────
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
+  const dropZone   = document.getElementById('dropZone');
+  const fileInput  = document.getElementById('fileInput');
   const filePreview = document.getElementById('filePreview');
-  const fileName = document.getElementById('fileName');
-  const fileSize = document.getElementById('fileSize');
-
-  fileInput.addEventListener('change', e => {
-    if (e.target.files[0]) setFile(e.target.files[0]);
-  });
-  document.getElementById('removeFile').onclick = () => {
-    uploadedFile = null;
-    fileInput.value = '';
-    filePreview.classList.remove('show');
-  };
-
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag');
-    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
-  });
-
-  function setFile(f) {
-    uploadedFile = f;
-    fileName.textContent = f.name;
-    fileSize.textContent = formatBytes(f.size);
-    filePreview.classList.add('show');
-  }
+  const fileNameEl = document.getElementById('fileName');
+  const fileSizeEl = document.getElementById('fileSize');
 
   function formatBytes(b) {
     if (b < 1024) return b + ' B';
@@ -752,218 +616,263 @@
     return (b/1048576).toFixed(1) + ' MB';
   }
 
-  // ─── Analyze ────────────────────────────────────────────────────────────────
-  async function analyze() {
-    const text = document.getElementById('textInput').value.trim();
-    if (!uploadedFile && !text) {
-      showError('Please upload a file or paste some text to analyze.');
-      return;
-    }
+  function setFile(f) {
+    uploadedFile = f;
+    fileNameEl.textContent = f.name;
+    fileSizeEl.textContent = formatBytes(f.size);
+    filePreview.classList.add('show');
+  }
 
-    hideError();
-    showLoader();
-    hideResults();
-    document.getElementById('analyzeBtn').disabled = true;
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) setFile(e.target.files[0]);
+  });
 
-    // Animate loader messages
-    let msgIdx = 0;
-    const msgInterval = setInterval(() => {
-      msgIdx = (msgIdx + 1) % loaderMessages.length;
-      document.getElementById('loaderText').textContent = loaderMessages[msgIdx];
-    }, 1100);
+  document.getElementById('removeFile').onclick = () => {
+    uploadedFile = null;
+    fileInput.value = '';
+    filePreview.classList.remove('show');
+  };
 
-    try {
-      let contentToAnalyze = text;
-      let isImage = false;
-      let imageData = null;
-      let imageType = null;
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag'); });
+  dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
 
-      if (uploadedFile) {
-        const ft = uploadedFile.type;
-        if (ft.startsWith('image/')) {
-          isImage = true;
-          imageData = await readFileAsBase64(uploadedFile);
-          imageType = ft;
-        } else {
-          contentToAnalyze = await readFileAsText(uploadedFile);
-          if (!contentToAnalyze && !text) throw new Error('Could not read file content. Try a .txt or .md file, or paste your text directly.');
-          if (!contentToAnalyze) contentToAnalyze = text;
-        }
-      }
-
-      const messages = buildMessages(contentToAnalyze, isImage, imageData, imageType, uploadedFile?.name);
-      const response = await callClaude(messages);
-      clearInterval(msgInterval);
-      const parsed = parseResponse(response);
-      renderResults(parsed);
-    } catch (err) {
-      clearInterval(msgInterval);
-      showError('Analysis failed: ' + err.message);
-    } finally {
-      hideLoader();
-      document.getElementById('analyzeBtn').disabled = false;
-    }
+  // ─── Read file as text / base64 ─────────────────────────────────────────────
+  function readFileAsText(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload  = () => res(r.result);
+      r.onerror = () => rej(new Error('File read failed'));
+      r.readAsText(file);
+    });
   }
 
   function readFileAsBase64(file) {
     return new Promise((res, rej) => {
       const r = new FileReader();
-      r.onload = () => res(r.result.split(',')[1]);
-      r.onerror = () => rej(new Error('File read error'));
+      r.onload  = () => res(r.result.split(',')[1]);
+      r.onerror = () => rej(new Error('File read failed'));
       r.readAsDataURL(file);
     });
   }
 
-  function readFileAsText(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result);
-      r.onerror = () => rej(new Error('File read error'));
-      r.readAsText(file);
-    });
+  function isImageFile(file) {
+    return file.type.startsWith('image/');
   }
 
-  function buildMessages(text, isImage, imageData, imageType, fname) {
-    const systemPrompt = `You are an expert AI content forensics analyst. Your job is to determine whether content was generated by an AI system (like GPT, Claude, Gemini, etc.) or written/created by a human.
+  // ─── Loader cycling ─────────────────────────────────────────────────────────
+  let loaderTimer = null;
+  function startLoader() {
+    const el = document.getElementById('loaderText');
+    let idx = 0;
+    el.textContent = loaderMessages[0];
+    loaderTimer = setInterval(() => {
+      idx = (idx + 1) % loaderMessages.length;
+      el.textContent = loaderMessages[idx];
+    }, 1600);
+  }
+  function stopLoader() {
+    clearInterval(loaderTimer);
+  }
 
-Analyze the provided content and respond ONLY with a valid JSON object (no markdown fences, no extra text) in this exact format:
+  // ─── Show / hide helpers ────────────────────────────────────────────────────
+  function showError(msg) {
+    const el = document.getElementById('errorBox');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  function hideError() {
+    document.getElementById('errorBox').classList.remove('show');
+  }
+
+  // ─── Main analyze ───────────────────────────────────────────────────────────
+  async function analyze() {
+    hideError();
+
+    const textVal = document.getElementById('textInput').value.trim();
+
+    if (!uploadedFile && !textVal) {
+      showError('⚠ Please upload a file or paste some text before analyzing.');
+      return;
+    }
+
+    // UI → loading state
+    document.getElementById('analyzeBtn').disabled = true;
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('loader').classList.add('show');
+    startLoader();
+
+    try {
+      let messages;
+
+      if (uploadedFile && isImageFile(uploadedFile)) {
+        // Image: send as vision message
+        const b64 = await readFileAsBase64(uploadedFile);
+        const mediaType = uploadedFile.type;
+        messages = [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: mediaType, data: b64 }
+            },
+            {
+              type: 'text',
+              text: buildPrompt('[IMAGE UPLOADED — analyze the image content]')
+            }
+          ]
+        }];
+      } else {
+        // Text or text-based file
+        let content = textVal;
+        if (uploadedFile) {
+          try { content = await readFileAsText(uploadedFile); }
+          catch { content = textVal || '(could not read file)'; }
+        }
+
+        messages = [{
+          role: 'user',
+          content: buildPrompt(content)
+        }];
+      }
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `API error ${response.status}`);
+      }
+
+      const data = await response.json();
+      const raw  = data.content.map(b => b.text || '').join('');
+      const parsed = parseResponse(raw);
+      renderResults(parsed);
+
+    } catch (err) {
+      showError('⚠ Analysis failed: ' + err.message);
+    } finally {
+      stopLoader();
+      document.getElementById('loader').classList.remove('show');
+      document.getElementById('analyzeBtn').disabled = false;
+    }
+  }
+
+  // ─── Prompt builders ─────────────────────────────────────────────────────────
+  const SYSTEM_PROMPT = `You are an expert AI content forensics engine. Your job is to analyze text or images and determine the probability that they were AI-generated versus written/created by a human.
+
+You MUST respond ONLY in the following JSON format (no extra text, no markdown fences):
 {
   "verdict": "AI" | "HUMAN" | "MIXED",
-  "confidence": <integer 0-100 representing AI probability>,
-  "title": "<short verdict title, max 5 words>",
+  "ai_probability": <integer 0-100>,
+  "title": "<short verdict title>",
   "signals": [
-    {"label": "<signal name>", "value": "<brief value>", "type": "red|green|yellow"},
-    ...
+    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" },
+    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" },
+    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" },
+    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" }
   ],
-  "analysis": "<2-4 paragraph detailed analysis explaining your reasoning, specific patterns found, and what contributed to the verdict>"
+  "analysis": "<2-4 sentence detailed explanation of findings>"
 }
 
-For the signals array, provide 4-6 key forensic signals you detected. Use type "red" for AI indicators, "green" for human indicators, "yellow" for ambiguous/neutral.
+Rules:
+- verdict: "AI" if ai_probability >= 70, "HUMAN" if <= 35, otherwise "MIXED"
+- Signals should reflect real forensic markers: perplexity level, burstiness, vocabulary diversity, sentence uniformity, stylometric patterns, etc.
+- Use "red" color for signals pointing toward AI, "green" for human, "yellow" for ambiguous
+- Be specific and technical in the analysis field
+- For images, analyze visual patterns, metadata hints, AI-generation artifacts like smooth gradients, perfect symmetry, unusual textures, etc.`;
 
-Be thorough, accurate, and specific in your analysis. Reference concrete patterns from the actual content.`;
-
-    if (isImage) {
-      return {
-        system: systemPrompt,
-        messages: [{
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: imageType, data: imageData } },
-            { type: "text", text: `Analyze this image${fname ? ` ("${fname}")` : ''} to determine if it was AI-generated (by image AI models like Midjourney, DALL-E, Stable Diffusion, etc.) or if it is a real/human-made photograph or artwork.` }
-          ]
-        }]
-      };
-    } else {
-      return {
-        system: systemPrompt,
-        messages: [{
-          role: "user",
-          content: `Analyze the following content${fname ? ` from file "${fname}"` : ''} for AI vs human origin:\n\n---\n${text.slice(0, 8000)}\n---`
-        }]
-      };
-    }
+  function buildPrompt(content) {
+    return `Please analyze the following content for AI detection:\n\n---\n${content.slice(0, 6000)}\n---\n\nProvide your forensic analysis in the specified JSON format.`;
   }
 
-  async function callClaude(payload) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        system: payload.system,
-        messages: payload.messages
-      })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `API error ${res.status}`);
-    }
-    const data = await res.json();
-    return data.content.map(b => b.text || '').join('');
-  }
-
+  // ─── Parse API response ──────────────────────────────────────────────────────
   function parseResponse(raw) {
-    let clean = raw.replace(/```json|```/g, '').trim();
-    // Extract JSON if wrapped in text
-    const match = clean.match(/\{[\s\S]*\}/);
-    if (match) clean = match[0];
-    return JSON.parse(clean);
+    try {
+      // Strip possible markdown fences
+      const clean = raw.replace(/```json|```/g, '').trim();
+      return JSON.parse(clean);
+    } catch {
+      // Fallback: extract JSON object from anywhere in the string
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (match) return JSON.parse(match[0]);
+      throw new Error('Could not parse AI response. Please try again.');
+    }
   }
 
+  // ─── Render results ──────────────────────────────────────────────────────────
   function renderResults(d) {
-    const verdict = d.verdict || 'MIXED';
-    const conf = Math.min(100, Math.max(0, parseInt(d.confidence) || 50));
-    const cls = verdict === 'AI' ? 'ai' : verdict === 'HUMAN' ? 'human' : 'mixed';
+    const verdict      = (d.verdict || 'MIXED').toUpperCase();
+    const aiProb       = Math.max(0, Math.min(100, parseInt(d.ai_probability) || 50));
+    const title        = d.title || 'Analysis Complete';
+    const signals      = Array.isArray(d.signals) ? d.signals : [];
+    const analysis     = d.analysis || '';
 
-    // Badge + title
+    // Verdict badge
     const badge = document.getElementById('verdictBadge');
-    badge.textContent = verdict === 'AI' ? '🤖 AI Generated' : verdict === 'HUMAN' ? '✍ Human Written' : '⚡ Mixed';
-    badge.className = `verdict-badge ${cls}`;
-    document.getElementById('resultTitle').textContent = d.title || (verdict === 'AI' ? 'Likely AI-Generated' : verdict === 'HUMAN' ? 'Likely Human-Written' : 'Mixed Origin Detected');
+    badge.textContent = verdict;
+    badge.className   = 'verdict-badge ' + verdict.toLowerCase();
+
+    document.getElementById('resultTitle').textContent = title;
 
     // Confidence bar
-    document.getElementById('confPct').textContent = conf + '% AI';
-    const bar = document.getElementById('confBar');
-    bar.className = `conf-fill ${cls}`;
-    setTimeout(() => { bar.style.width = conf + '%'; }, 100);
-
-    // Signals
-    const grid = document.getElementById('signalGrid');
-    grid.innerHTML = '';
-    (d.signals || []).forEach(s => {
-      grid.innerHTML += `<div class="signal-card ${s.type||'yellow'}">
-        <div class="s-label">${escHtml(s.label)}</div>
-        <div class="s-val">${escHtml(s.value)}</div>
-      </div>`;
+    const confClass = verdict === 'AI' ? 'ai' : verdict === 'HUMAN' ? 'human' : 'mixed';
+    const bar       = document.getElementById('confBar');
+    bar.className   = 'conf-fill ' + confClass;
+    document.getElementById('confPct').textContent = aiProb + '%';
+    // Trigger animation after a tick
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { bar.style.width = aiProb + '%'; });
     });
 
-    // Analysis
-    document.getElementById('analysisText').innerHTML = escHtml(d.analysis || '').replace(/\n\n/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>');
+    // Signal cards
+    const grid = document.getElementById('signalGrid');
+    grid.innerHTML = '';
+    signals.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'signal-card ' + (s.color || 'yellow');
+      card.innerHTML = `<div class="s-label">${escHtml(s.label)}</div><div class="s-val">${escHtml(s.value)}</div>`;
+      grid.appendChild(card);
+    });
 
-    showResults();
+    // Analysis text
+    document.getElementById('analysisText').textContent = analysis;
+
+    // Show
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  // ─── UI helpers ─────────────────────────────────────────────────────────────
-  function showLoader() { document.getElementById('loader').classList.add('show'); }
-  function hideLoader() { document.getElementById('loader').classList.remove('show'); }
-  function showResults() { document.getElementById('results').classList.add('show'); }
-  function hideResults() { document.getElementById('results').classList.remove('show'); }
-  function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.classList.add('show'); }
-  function hideError() { document.getElementById('errorBox').classList.remove('show'); }
-
-  function reset() {
+  // ─── Reset ───────────────────────────────────────────────────────────────────
+  function resetApp() {
     uploadedFile = null;
     fileInput.value = '';
-    filePreview.classList.remove('show');
     document.getElementById('textInput').value = '';
-    hideResults();
+    document.getElementById('filePreview').classList.remove('show');
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('confBar').style.width = '0%';
     hideError();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ─── Logo Typewriter ──────────────────────────────────────────────────────
-  (function() {
-    const text = 'PROJECT HELIOS';
-    const el = document.getElementById('logoTyped');
-    const cursor = document.getElementById('logoCursor');
-    let i = 0;
-    // Start after sun animation (~1.4s)
-    setTimeout(function type() {
-      if (i <= text.length) {
-        el.textContent = text.slice(0, i);
-        i++;
-        setTimeout(type, i === 1 ? 200 : 95);
-      } else {
-        // Keep cursor blinking for 2s then hide it
-        setTimeout(() => cursor.classList.add('hide'), 2200);
-      }
-    }, 1400);
-  })();
+  // ─── Utility ─────────────────────────────────────────────────────────────────
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 </script>
 </body>
-  </html>
+</html>
