@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Helios — AI Detector</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #00ff88;
+    --accent2: #ff3366;
+    --accent3: #6644ff;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --grid: rgba(0,255,136,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+  }
+  .orb-1 { width: 500px; height: 500px; background: var(--accent3); top: -200px; left: -150px; }
+  .orb-2 { width: 400px; height: 400px; background: var(--accent); bottom: -100px; right: -100px; }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 60px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+  .logo-typed { color: #FFD700; }
+  .logo-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 0.85em;
+    background: #FFD700;
+    margin-left: 5px;
+    vertical-align: middle;
+    border-radius: 1px;
+    animation: cursorBlink 0.75s step-end infinite;
+  }
+  .logo-cursor.hide { opacity: 0; animation: none; }
+  @keyframes cursorBlink {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0; }
+  }
+  .logo-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .badge {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 10px;
+    animation: blink 2s step-end infinite;
+  }
+  @keyframes blink {
+    0%,100%{opacity:1} 50%{opacity:0.3}
+  }
+
+  /* Hero tag */
+  .hero-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 7vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .hero-tag .line2 { color: var(--accent2); display: block; }
+  .hero-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 50px;
+    max-width: 500px;
+    line-height: 1.7;
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    background: var(--surface);
+    padding: 50px 32px;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(0,255,136,0.03) 100%);
+    pointer-events: none;
+  }
+  .upload-zone:hover, .upload-zone.drag {
+    border-color: var(--accent);
+    background: rgba(0,255,136,0.03);
+  }
+  .upload-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+  .upload-zone h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .upload-zone p {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+  }
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .file-types {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .ft-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 3px 8px;
+  }
+
+  /* Text input fallback */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0;
+    color: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    padding: 20px;
+    resize: vertical;
+    min-height: 160px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  textarea:focus { border-color: var(--accent3); }
+  textarea::placeholder { color: var(--muted); }
+
+  /* Analyze button */
+  .btn-analyze {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 18px 32px;
+    cursor: pointer;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .btn-analyze::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transition: left 0.4s;
+  }
+  .btn-analyze:hover::after { left: 100%; }
+  .btn-analyze:hover { background: #00ffaa; }
+  .btn-analyze:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+  .btn-analyze:disabled::after { display: none; }
+
+  /* File preview */
+  .file-preview {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: rgba(0,255,136,0.06);
+    border: 1px solid rgba(0,255,136,0.2);
+    font-size: 0.72rem;
+    color: var(--accent);
+    align-items: center;
+    gap: 12px;
+  }
+  .file-preview.show { display: flex; }
+  .file-preview .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-preview .fsize { color: var(--muted); flex-shrink: 0; }
+  .remove-file { cursor: pointer; color: var(--accent2); font-size: 1rem; flex-shrink: 0; }
+
+  /* Loader */
+  .loader-wrap {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 0;
+    gap: 20px;
+  }
+  .loader-wrap.show { display: flex; }
+  .loader {
+    width: 60px;
+    height: 60px;
+    position: relative;
+  }
+  .loader::before, .loader::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+  }
+  .loader::before {
+    border-top-color: var(--accent);
+    animation: spin 0.9s linear infinite;
+  }
+  .loader::after {
+    border-bottom-color: var(--accent3);
+    animation: spin 1.5s linear infinite reverse;
+    inset: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* Results panel */
+  .results {
+    display: none;
+    margin-top: 40px;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .results.show { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .verdict-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    flex-shrink: 0;
+  }
+  .verdict-badge.ai { background: var(--accent2); color: #fff; }
+  .verdict-badge.human { background: var(--accent); color: #000; }
+  .verdict-badge.mixed { background: var(--accent3); color: #fff; }
+  .result-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+
+  /* Confidence meter */
+  .confidence-wrap {
+    margin-bottom: 28px;
+  }
+  .conf-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .conf-track {
+    height: 6px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .conf-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .conf-fill.ai { background: linear-gradient(90deg, var(--accent2), #ff6699); }
+  .conf-fill.human { background: linear-gradient(90deg, var(--accent3), var(--accent)); }
+  .conf-fill.mixed { background: linear-gradient(90deg, var(--accent3), var(--accent2)); }
+
+  /* Signal grid */
+  .signals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .signal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .signal-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+  }
+  .signal-card.red::before { background: var(--accent2); }
+  .signal-card.green::before { background: var(--accent); }
+  .signal-card.yellow::before { background: #ffcc00; }
+  .signal-card .s-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .signal-card .s-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .signal-card.red .s-val { color: var(--accent2); }
+  .signal-card.green .s-val { color: var(--accent); }
+  .signal-card.yellow .s-val { color: #ffcc00; }
+
+  /* Analysis body */
+  .analysis-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    font-size: 0.82rem;
+    line-height: 1.9;
+    color: #c0c0d8;
+  }
+  .analysis-body h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* Reset */
+  .btn-reset {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.2s;
+  }
+  .btn-reset:hover { border-color: var(--accent3); color: var(--text); }
+
+  /* Error */
+  .error-box {
+    display: none;
+    background: rgba(255,51,102,0.08);
+    border: 1px solid var(--accent2);
+    padding: 18px;
+    font-size: 0.78rem;
+    color: var(--accent2);
+    margin-top: 20px;
+    line-height: 1.7;
+  }
+  .error-box.show { display: block; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── Sun Logo ─────────────────────────────────────────── */
+  .sun-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .sun-svg-wrap {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+  }
+  .sun-svg {
+    width: 58px;
+    height: 58px;
+    overflow: visible;
+  }
+
+  /* Core circle fills in first */
+  .sun-core {
+    fill: #FFD700;
+    r: 0;
+    transform-origin: 29px 29px;
+    animation: coreGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s forwards;
+  }
+  @keyframes coreGrow {
+    from { r: 0; opacity: 0; }
+    to   { r: 11; opacity: 1; }
+  }
+
+  /* Rays — each is a <line>, drawn right after core */
+  .sun-ray {
+    stroke: #FFD700;
+    stroke-linecap: round;
+    stroke-width: 2.5;
+    opacity: 0;
+    transform-origin: 29px 29px;
+  }
+  /* 8 rays, staggered entry */
+  .sun-ray:nth-child(1)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.55s forwards; }
+  .sun-ray:nth-child(2)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.65s forwards; }
+  .sun-ray:nth-child(3)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.75s forwards; }
+  .sun-ray:nth-child(4)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.85s forwards; }
+  .sun-ray:nth-child(5)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.95s forwards; }
+  .sun-ray:nth-child(6)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.05s forwards; }
+  .sun-ray:nth-child(7)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.15s forwards; }
+  .sun-ray:nth-child(8)  { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.25s forwards; }
+  @keyframes rayGrow {
+    0%   { opacity: 0; stroke-dasharray: 0 12; stroke-dashoffset: 0; }
+    60%  { opacity: 1; }
+    100% { opacity: 1; stroke-dasharray: 12 0; }
+  }
+
+  /* Idle slow spin after full reveal */
+  .sun-rays-group {
+    transform-origin: 29px 29px;
+    animation: sunSpin 18s linear 1.8s infinite;
+  }
+  @keyframes sunSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Continuous gentle pulse on core */
+  .sun-core-anim {
+    transform-origin: 29px 29px;
+    animation: coreGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s forwards,
+               corePulse 3s ease-in-out 1.8s infinite;
+  }
+  @keyframes corePulse {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0.7; }
+  }
+
+  /* Yellow glow under the svg */
+  .sun-svg-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: #FFD700;
+    filter: blur(14px);
+    opacity: 0;
+    animation: glowIn 0.8s ease 1.4s forwards;
+    z-index: -1;
+  }
+  @keyframes glowIn {
+    to { opacity: 0.28; }
+  }
+
+  @media(max-width:600px){
+    .hero-tag { font-size: 2.2rem; }
+    header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .sun-svg-wrap { width: 46px; height: 46px; }
+    .sun-svg { width: 46px; height: 46px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+  <header>
+    <div class="sun-logo">
+      <div class="sun-svg-wrap">
+        <svg class="sun-svg" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
+          <g class="sun-rays-group">
+            <line class="sun-ray" x1="29" y1="14" x2="29" y2="5"/>
+            <line class="sun-ray" x1="38.5" y1="19.5" x2="44.5" y2="13.5"/>
+            <line class="sun-ray" x1="44" y1="29" x2="53" y2="29"/>
+            <line class="sun-ray" x1="38.5" y1="38.5" x2="44.5" y2="44.5"/>
+            <line class="sun-ray" x1="29" y1="44" x2="29" y2="53"/>
+            <line class="sun-ray" x1="19.5" y1="38.5" x2="13.5" y2="44.5"/>
+            <line class="sun-ray" x1="14" y1="29" x2="5" y2="29"/>
+            <line class="sun-ray" x1="19.5" y1="19.5" x2="13.5" y2="13.5"/>
+          </g>
+          <circle class="sun-core sun-core-anim" cx="29" cy="29"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo"><span class="logo-typed" id="logoTyped"></span><span class="logo-cursor" id="logoCursor"></span></div>
+        <div class="logo-sub">Powered by Claude · Anthropic</div>
+      </div>
+    </div>
+    <div class="badge">● Live</div>
+  </header>
+
+  <h1 class="hero-tag">
+    Expose the<br>
+    <span class="line2">Reality.</span>
+  </h1>
+  <p class="hero-sub">
+    Upload any document, image, or paste text below.<br>
+    Our AI forensics engine will determine if it was generated by artificial intelligence.
+  </p>
+
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.md,.csv">
+    <span class="upload-icon">⬆</span>
+    <h3>Drop your file here</h3>
+    <p>Drag & drop or click to browse</p>
+    <div class="file-types">
+      <span class="ft-tag">TXT</span>
+      <span class="ft-tag">PDF</span>
+      <span class="ft-tag">PNG/JPG</span>
+      <span class="ft-tag">DOCX</span>
+      <span class="ft-tag">MD</span>
+      <span class="ft-tag">CSV</span>
+    </div>
+  </div>
+
+  <div class="file-preview" id="filePreview">
+    <span>📄</span>
+    <span class="fname" id="fileName"></span>
+    <span class="fsize" id="fileSize"></span>
+    <span class="remove-file" id="removeFile">✕</span>
+  </div>
+
+  <div class="divider">or paste text</div>
+
+  <textarea id="textInput" placeholder="Paste your text here for AI detection analysis...&#10;&#10;Works best with 100+ words of content."></textarea>
+
+  <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">
+    ⚡ Analyze Content
+  </button>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Loader -->
+  <div class="loader-wrap" id="loader">
+    <div class="loader"></div>
+    <div class="loader-text" id="loaderText">Initializing forensics engine...</div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <div class="result-header">
+      <span class="verdict-badge" id="verdictBadge">AI</span>
+      <div class="result-title" id="resultTitle">Likely AI-Generated</div>
+    </div>
+
+    <div class="confidence-wrap">
+      <div class="conf-label">
+        <span>AI Probability</span>
+        <span id="confPct">—</span>
+      </div>
+      <div class="conf-track">
+        <div class="conf-fill ai" id="confBar"></div>
+      </div>
+    </div>
+
+    <div class="signals" id="signalGrid"></div>
+
+    <div class="analysis-body">
+      <h4>Detailed Analysis</h4>
+      <div id="analysisText"></div>
+    </div>
+
+    <button class="btn-reset" onclick="reset()">↺ Analyze Another</button>
+  </div>
+
+
+</div>
+
+<script>
+  // ─── State ─────────────────────────────────────────────────────────────────
+  let uploadedFile = null;
+  const loaderMessages = [
+    "Initializing forensics engine...",
+    "Scanning linguistic patterns...",
+    "Measuring entropy distribution...",
+    "Checking stylometric markers...",
+    "Analyzing semantic coherence...",
+    "Running perplexity analysis...",
+    "Comparing to AI fingerprints...",
+    "Generating verdict..."
+  ];
+
+  // ─── File handling ──────────────────────────────────────────────────────────
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const filePreview = document.getElementById('filePreview');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) setFile(e.target.files[0]);
+  });
+  document.getElementById('removeFile').onclick = () => {
+    uploadedFile = null;
+    fileInput.value = '';
+    filePreview.classList.remove('show');
+  };
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
+
+  function setFile(f) {
+    uploadedFile = f;
+    fileName.textContent = f.name;
+    fileSize.textContent = formatBytes(f.size);
+    filePreview.classList.add('show');
+  }
+
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    return (b/1048576).toFixed(1) + ' MB';
+  }
+
+  // ─── Analyze ────────────────────────────────────────────────────────────────
+  async function analyze() {
+    const text = document.getElementById('textInput').value.trim();
+    if (!uploadedFile && !text) {
+      showError('Please upload a file or paste some text to analyze.');
+      return;
+    }
+
+    hideError();
+    showLoader();
+    hideResults();
+    document.getElementById('analyzeBtn').disabled = true;
+
+    // Animate loader messages
+    let msgIdx = 0;
+    const msgInterval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % loaderMessages.length;
+      document.getElementById('loaderText').textContent = loaderMessages[msgIdx];
+    }, 1100);
+
+    try {
+      let contentToAnalyze = text;
+      let isImage = false;
+      let imageData = null;
+      let imageType = null;
+
+      if (uploadedFile) {
+        const ft = uploadedFile.type;
+        if (ft.startsWith('image/')) {
+          isImage = true;
+          imageData = await readFileAsBase64(uploadedFile);
+          imageType = ft;
+        } else {
+          contentToAnalyze = await readFileAsText(uploadedFile);
+          if (!contentToAnalyze && !text) throw new Error('Could not read file content. Try a .txt or .md file, or paste your text directly.');
+          if (!contentToAnalyze) contentToAnalyze = text;
+        }
+      }
+
+      const messages = buildMessages(contentToAnalyze, isImage, imageData, imageType, uploadedFile?.name);
+      const response = await callClaude(messages);
+      clearInterval(msgInterval);
+      const parsed = parseResponse(response);
+      renderResults(parsed);
+    } catch (err) {
+      clearInterval(msgInterval);
+      showError('Analysis failed: ' + err.message);
+    } finally {
+      hideLoader();
+      document.getElementById('analyzeBtn').disabled = false;
+    }
+  }
+
+  function readFileAsBase64(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
+      r.onerror = () => rej(new Error('File read error'));
+      r.readAsDataURL(file);
+    });
+  }
+
+  function readFileAsText(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = () => rej(new Error('File read error'));
+      r.readAsText(file);
+    });
+  }
+
+  function buildMessages(text, isImage, imageData, imageType, fname) {
+    const systemPrompt = `You are an expert AI content forensics analyst. Your job is to determine whether content was generated by an AI system (like GPT, Claude, Gemini, etc.) or written/created by a human.
+
+Analyze the provided content and respond ONLY with a valid JSON object (no markdown fences, no extra text) in this exact format:
+{
+  "verdict": "AI" | "HUMAN" | "MIXED",
+  "confidence": <integer 0-100 representing AI probability>,
+  "title": "<short verdict title, max 5 words>",
+  "signals": [
+    {"label": "<signal name>", "value": "<brief value>", "type": "red|green|yellow"},
+    ...
+  ],
+  "analysis": "<2-4 paragraph detailed analysis explaining your reasoning, specific patterns found, and what contributed to the verdict>"
+}
+
+For the signals array, provide 4-6 key forensic signals you detected. Use type "red" for AI indicators, "green" for human indicators, "yellow" for ambiguous/neutral.
+
+Be thorough, accurate, and specific in your analysis. Reference concrete patterns from the actual content.`;
+
+    if (isImage) {
+      return {
+        system: systemPrompt,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: imageType, data: imageData } },
+            { type: "text", text: `Analyze this image${fname ? ` ("${fname}")` : ''} to determine if it was AI-generated (by image AI models like Midjourney, DALL-E, Stable Diffusion, etc.) or if it is a real/human-made photograph or artwork.` }
+          ]
+        }]
+      };
+    } else {
+      return {
+        system: systemPrompt,
+        messages: [{
+          role: "user",
+          content: `Analyze the following content${fname ? ` from file "${fname}"` : ''} for AI vs human origin:\n\n---\n${text.slice(0, 8000)}\n---`
+        }]
+      };
+    }
+  }
+
+  async function callClaude(payload) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: payload.system,
+        messages: payload.messages
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+    const data = await res.json();
+    return data.content.map(b => b.text || '').join('');
+  }
+
+  function parseResponse(raw) {
+    let clean = raw.replace(/```json|```/g, '').trim();
+    // Extract JSON if wrapped in text
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (match) clean = match[0];
+    return JSON.parse(clean);
+  }
+
+  function renderResults(d) {
+    const verdict = d.verdict || 'MIXED';
+    const conf = Math.min(100, Math.max(0, parseInt(d.confidence) || 50));
+    const cls = verdict === 'AI' ? 'ai' : verdict === 'HUMAN' ? 'human' : 'mixed';
+
+    // Badge + title
+    const badge = document.getElementById('verdictBadge');
+    badge.textContent = verdict === 'AI' ? '🤖 AI Generated' : verdict === 'HUMAN' ? '✍ Human Written' : '⚡ Mixed';
+    badge.className = `verdict-badge ${cls}`;
+    document.getElementById('resultTitle').textContent = d.title || (verdict === 'AI' ? 'Likely AI-Generated' : verdict === 'HUMAN' ? 'Likely Human-Written' : 'Mixed Origin Detected');
+
+    // Confidence bar
+    document.getElementById('confPct').textContent = conf + '% AI';
+    const bar = document.getElementById('confBar');
+    bar.className = `conf-fill ${cls}`;
+    setTimeout(() => { bar.style.width = conf + '%'; }, 100);
+
+    // Signals
+    const grid = document.getElementById('signalGrid');
+    grid.innerHTML = '';
+    (d.signals || []).forEach(s => {
+      grid.innerHTML += `<div class="signal-card ${s.type||'yellow'}">
+        <div class="s-label">${escHtml(s.label)}</div>
+        <div class="s-val">${escHtml(s.value)}</div>
+      </div>`;
+    });
+
+    // Analysis
+    document.getElementById('analysisText').innerHTML = escHtml(d.analysis || '').replace(/\n\n/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>');
+
+    showResults();
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ─── UI helpers ─────────────────────────────────────────────────────────────
+  function showLoader() { document.getElementById('loader').classList.add('show'); }
+  function hideLoader() { document.getElementById('loader').classList.remove('show'); }
+  function showResults() { document.getElementById('results').classList.add('show'); }
+  function hideResults() { document.getElementById('results').classList.remove('show'); }
+  function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.classList.add('show'); }
+  function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+  function reset() {
+    uploadedFile = null;
+    fileInput.value = '';
+    filePreview.classList.remove('show');
+    document.getElementById('textInput').value = '';
+    hideResults();
+    hideError();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─── Logo Typewriter ──────────────────────────────────────────────────────
+  (function() {
+    const text = 'PROJECT HELIOS';
+    const el = document.getElementById('logoTyped');
+    const cursor = document.getElementById('logoCursor');
+    let i = 0;
+    // Start after sun animation (~1.4s)
+    setTimeout(function type() {
+      if (i <= text.length) {
+        el.textContent = text.slice(0, i);
+        i++;
+        setTimeout(type, i === 1 ? 200 : 95);
+      } else {
+        // Keep cursor blinking for 2s then hide it
+        setTimeout(() => cursor.classList.add('hide'), 2200);
+      }
+    }, 1400);
+  })();
+</script>
+</body>
+  </html>
