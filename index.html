@@ -3,1003 +3,728 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Helios — AI Detector</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<title>DropBeam</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --border: #1e1e2e;
-    --accent: #00ff88;
-    --accent2: #ff3366;
-    --accent3: #6644ff;
-    --text: #e8e8f0;
-    --muted: #5a5a7a;
-    --grid: rgba(0,255,136,0.04);
-  }
+:root {
+  --bg: #0d0d14;
+  --card: #161622;
+  --border: #252538;
+  --accent: #5e6ad2;
+  --accent-glow: rgba(94,106,210,.25);
+  --green: #3dd68c;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --text: #e2e2f0;
+  --sub: #6b6b8f;
+  --r: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 14px 60px;
+}
+/* subtle dot grid */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(rgba(94,106,210,.12) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;z-index:0;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+.shell{position:relative;z-index:1;width:100%;max-width:520px;}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: crosshair;
-  }
+/* ─── HEADER ─── */
+.hdr{text-align:center;padding:10px 0 28px;}
+.logo{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1;}
+.logo em{font-style:normal;color:var(--accent);}
+.sub{font-family:'Fira Code',monospace;font-size:10px;color:var(--sub);letter-spacing:2px;text-transform:uppercase;margin-top:5px;}
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+/* ─── MODE TOGGLE ─── */
+.mode-row{display:flex;gap:8px;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:5px;}
+.mode-btn{flex:1;padding:10px;border:none;background:transparent;color:var(--sub);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;}
+.mode-btn.active{background:var(--accent);color:#fff;box-shadow:0 0 18px var(--accent-glow);}
 
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.3;
-  }
-  .orb-1 { width: 500px; height: 500px; background: var(--accent3); top: -200px; left: -150px; }
-  .orb-2 { width: 400px; height: 400px; background: var(--accent); bottom: -100px; right: -100px; }
+/* ─── CARD ─── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px;}
+.card-title{font-family:'Fira Code',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--sub);margin-bottom:12px;}
 
-  .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
+/* ─── ROOM INPUT ─── */
+.room-row{display:flex;gap:8px;align-items:center;}
+.room-in{
+  flex:1;background:var(--bg);border:1px solid var(--border);border-radius:9px;
+  padding:11px 14px;color:var(--accent);font-family:'Fira Code',monospace;
+  font-size:16px;font-weight:500;letter-spacing:3px;text-transform:uppercase;
+  outline:none;transition:border-color .2s;
+}
+.room-in:focus{border-color:var(--accent);}
+.room-in::placeholder{color:var(--border);letter-spacing:1px;}
+.btn-sm{
+  background:var(--border);border:none;color:var(--text);
+  font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;
+  padding:11px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;
+  text-transform:uppercase;letter-spacing:.5px;transition:background .2s;
+}
+.btn-sm:hover{background:var(--accent);color:#fff;}
 
-  header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 60px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: clamp(1.8rem, 5vw, 2.8rem);
-    letter-spacing: 0.04em;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-  }
-  .logo-typed { color: #FFD700; }
-  .logo-cursor {
-    display: inline-block;
-    width: 3px;
-    height: 0.85em;
-    background: #FFD700;
-    margin-left: 5px;
-    vertical-align: middle;
-    border-radius: 1px;
-    animation: cursorBlink 0.75s step-end infinite;
-  }
-  .logo-cursor.hide { opacity: 0; animation: none; }
-  @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
-  .logo-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-top: 6px;
-  }
-  .badge {
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 4px 10px;
-    animation: blink 2s step-end infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+/* pill indicator */
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:99px;font-family:'Fira Code',monospace;
+  font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;
+  border:1px solid var(--border);color:var(--sub);margin-top:10px;
+}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--sub);}
+.pill.on{border-color:var(--green);color:var(--green);}
+.pill.on .dot{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1.4s infinite;}
+.pill.err{border-color:var(--red);color:var(--red);}
+.pill.err .dot{background:var(--red);}
+.pill.wait{border-color:var(--yellow);color:var(--yellow);}
+.pill.wait .dot{background:var(--yellow);animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-  .hero-tag {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2rem, 7vw, 4.5rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin-bottom: 16px;
-  }
-  .hero-tag .line2 { color: var(--accent2); display: block; }
-  .hero-sub {
-    font-size: 0.8rem;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    margin-bottom: 50px;
-    max-width: 500px;
-    line-height: 1.7;
-  }
+/* ─── DROP ZONE ─── */
+.dz{
+  border:2px dashed var(--border);border-radius:var(--r);
+  padding:32px 16px;text-align:center;cursor:pointer;
+  transition:all .2s;position:relative;background:var(--bg);
+}
+.dz.over{border-color:var(--accent);background:var(--accent-glow);}
+.dz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dz-icon{font-size:32px;display:block;margin-bottom:10px;}
+.dz-text{font-size:13px;color:var(--sub);}
+.dz-text b{color:var(--text);display:block;margin-bottom:3px;font-size:15px;}
 
-  .upload-zone {
-    border: 2px dashed var(--border);
-    background: var(--surface);
-    padding: 50px 32px;
-    text-align: center;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  .upload-zone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 40%, rgba(0,255,136,0.03) 100%);
-    pointer-events: none;
-  }
-  .upload-zone:hover, .upload-zone.drag {
-    border-color: var(--accent);
-    background: rgba(0,255,136,0.03);
-  }
-  .upload-icon { font-size: 2.5rem; display: block; margin-bottom: 16px; opacity: 0.6; }
-  .upload-zone h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-  .upload-zone p { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; line-height: 1.8; }
-  .upload-zone input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
-  .file-types { display: flex; gap: 8px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
-  .ft-tag {
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 3px 8px;
-  }
+/* file bar */
+.fbar{display:none;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;}
+.fbar.show{display:flex;}
+.fbar-icon{font-size:24px;}
+.fbar-info{flex:1;min-width:0;}
+.fbar-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fbar-size{font-family:'Fira Code',monospace;font-size:10px;color:var(--sub);margin-top:2px;}
+.fbar-rm{background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:2px 6px;}
 
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin: 28px 0;
-    color: var(--muted);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+/* image thumb */
+.img-pre{display:none;max-width:100%;max-height:150px;border-radius:9px;margin-bottom:12px;border:1px solid var(--border);}
+.img-pre.show{display:block;margin:0 auto 12px;}
 
-  textarea {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.78rem;
-    line-height: 1.7;
-    padding: 20px;
-    resize: vertical;
-    min-height: 160px;
-    outline: none;
-    transition: border 0.2s;
-  }
-  textarea:focus { border-color: var(--accent3); }
-  textarea::placeholder { color: var(--muted); }
+/* text area */
+.txa{
+  width:100%;min-height:90px;resize:vertical;
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:'Fira Code',monospace;font-size:13px;
+  padding:12px;outline:none;transition:border-color .2s;
+}
+.txa:focus{border-color:var(--accent);}
+.txa::placeholder{color:var(--border);}
 
-  .btn-analyze {
-    width: 100%;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 18px 32px;
-    cursor: pointer;
-    margin-top: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.2s;
-  }
-  .btn-analyze::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-    transition: left 0.4s;
-  }
-  .btn-analyze:hover::after { left: 100%; }
-  .btn-analyze:hover { background: #00ffaa; }
-  .btn-analyze:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-  .btn-analyze:disabled::after { display: none; }
+/* progress */
+.prog-wrap{display:none;margin-top:10px;}
+.prog-wrap.show{display:block;}
+.prog-bg{background:var(--border);border-radius:99px;height:5px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .2s;}
+.prog-lbl{font-family:'Fira Code',monospace;font-size:10px;color:var(--sub);text-align:center;margin-top:5px;}
 
-  .file-preview {
-    display: none;
-    margin-top: 16px;
-    padding: 14px 18px;
-    background: rgba(0,255,136,0.06);
-    border: 1px solid rgba(0,255,136,0.2);
-    font-size: 0.72rem;
-    color: var(--accent);
-    align-items: center;
-    gap: 12px;
-  }
-  .file-preview.show { display: flex; }
-  .file-preview .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .file-preview .fsize { color: var(--muted); flex-shrink: 0; }
-  .remove-file { cursor: pointer; color: var(--accent2); font-size: 1rem; flex-shrink: 0; }
+/* main button */
+.btn-main{
+  width:100%;padding:15px;border:none;border-radius:var(--r);
+  font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-main.send-btn{background:var(--accent);color:#fff;box-shadow:0 0 20px var(--accent-glow);}
+.btn-main.send-btn:active{transform:scale(.97);}
+.btn-main.send-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+.btn-main.send-btn.ok{background:var(--green);box-shadow:0 0 20px rgba(61,214,140,.25);}
+.btn-main.recv-btn{background:transparent;border:2px solid var(--accent);color:var(--accent);}
+.btn-main.recv-btn.listening{background:var(--red);border-color:var(--red);color:#fff;}
+.btn-main.recv-btn:active{transform:scale(.97);}
 
-  .loader-wrap {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 60px 0;
-    gap: 20px;
-  }
-  .loader-wrap.show { display: flex; }
-  .loader { width: 60px; height: 60px; position: relative; }
-  .loader::before, .loader::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border: 2px solid transparent;
-    border-radius: 50%;
-  }
-  .loader::before { border-top-color: var(--accent); animation: spin 0.9s linear infinite; }
-  .loader::after { border-bottom-color: var(--accent3); animation: spin 1.5s linear infinite reverse; inset: 8px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loader-text {
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+.status-msg{text-align:center;font-family:'Fira Code',monospace;font-size:11px;margin-top:10px;min-height:16px;}
+.status-msg.ok{color:var(--green);}
+.status-msg.err{color:var(--red);}
+.status-msg.info{color:var(--accent);}
 
-  .results { display: none; margin-top: 40px; animation: fadeUp 0.5s ease forwards; }
-  .results.show { display: block; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+/* ─── INBOX ─── */
+.inbox-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.inbox-title{font-family:'Fira Code',monospace;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--sub);}
+.badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;}
+.btn-clr{margin-left:auto;background:none;border:1px solid var(--border);color:var(--sub);font-family:'Fira Code',monospace;font-size:10px;padding:4px 10px;border-radius:7px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;}
+.btn-clr:hover{border-color:var(--red);color:var(--red);}
 
-  .result-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .verdict-badge {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    flex-shrink: 0;
-  }
-  .verdict-badge.ai { background: var(--accent2); color: #fff; }
-  .verdict-badge.human { background: var(--accent); color: #000; }
-  .verdict-badge.mixed { background: var(--accent3); color: #fff; }
-  .result-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
+.packets{display:flex;flex-direction:column;gap:10px;}
+.pkt{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px;animation:pop .25s ease;
+}
+.pkt.fresh{border-color:var(--accent);}
+@keyframes pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.pkt-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.pkt-ico{font-size:20px;}
+.pkt-time{font-family:'Fira Code',monospace;font-size:10px;color:var(--sub);flex:1;}
+.pkt-new{background:var(--accent);color:#fff;font-family:'Fira Code',monospace;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:1px;}
+.pkt-msg{
+  font-family:'Fira Code',monospace;font-size:12px;line-height:1.6;
+  color:var(--text);background:rgba(94,106,210,.07);
+  border-left:3px solid var(--accent);padding:9px 11px;
+  border-radius:0 8px 8px 0;white-space:pre-wrap;word-break:break-word;
+  user-select:text;margin-bottom:8px;
+}
+.btn-cp{
+  background:var(--border);border:none;color:var(--sub);
+  font-family:'Fira Code',monospace;font-size:10px;
+  padding:5px 10px;border-radius:6px;cursor:pointer;
+  transition:all .2s;letter-spacing:.5px;
+}
+.btn-cp:hover{background:var(--accent);color:#fff;}
+.pkt-file{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:9px;padding:10px;
+}
+.pkt-file-ico{font-size:24px;}
+.pkt-finfo{flex:1;min-width:0;}
+.pkt-fname{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pkt-ftype{font-family:'Fira Code',monospace;font-size:10px;color:var(--sub);margin-top:2px;}
+.btn-dl{
+  background:var(--accent);color:#fff;border:none;border-radius:7px;
+  font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;
+  padding:7px 12px;cursor:pointer;text-decoration:none;
+  text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.btn-dl:hover{opacity:.85;}
+.pkt-img{max-width:100%;max-height:260px;border-radius:8px;margin-top:10px;border:1px solid var(--border);display:block;}
 
-  .confidence-wrap { margin-bottom: 28px; }
-  .conf-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .conf-track { height: 6px; background: var(--border); position: relative; overflow: hidden; }
-  .conf-fill { height: 100%; width: 0%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
-  .conf-fill.ai { background: linear-gradient(90deg, var(--accent2), #ff6699); }
-  .conf-fill.human { background: linear-gradient(90deg, var(--accent3), var(--accent)); }
-  .conf-fill.mixed { background: linear-gradient(90deg, var(--accent3), var(--accent2)); }
+.empty-state{text-align:center;padding:40px 20px;color:var(--sub);font-family:'Fira Code',monospace;font-size:12px;}
+.empty-state span{font-size:40px;display:block;margin-bottom:12px;opacity:.4;}
 
-  .signals {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-  .signal-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .signal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
-  .signal-card.red::before { background: var(--accent2); }
-  .signal-card.green::before { background: var(--accent); }
-  .signal-card.yellow::before { background: #ffcc00; }
-  .signal-card .s-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-  .signal-card .s-val { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
-  .signal-card.red .s-val { color: var(--accent2); }
-  .signal-card.green .s-val { color: var(--accent); }
-  .signal-card.yellow .s-val { color: #ffcc00; }
-
-  .analysis-body {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 24px;
-    font-size: 0.82rem;
-    line-height: 1.9;
-    color: #c0c0d8;
-  }
-  .analysis-body h4 {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-
-  .btn-reset {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: all 0.2s;
-  }
-  .btn-reset:hover { border-color: var(--accent3); color: var(--text); }
-
-  /* API Key Panel */
-  .api-key-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 20px 24px;
-    margin-bottom: 36px;
-    position: relative;
-  }
-  .api-key-panel::before {
-    content: 'REQUIRED';
-    position: absolute;
-    top: -1px; right: 20px;
-    font-size: 0.55rem;
-    letter-spacing: 0.15em;
-    background: var(--accent3);
-    color: #fff;
-    padding: 3px 8px;
-  }
-  .api-key-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .api-key-label a {
-    color: var(--accent3);
-    text-decoration: none;
-    font-size: 0.6rem;
-  }
-  .api-key-label a:hover { text-decoration: underline; }
-  .api-key-row { display: flex; gap: 10px; align-items: stretch; }
-  .api-key-input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    padding: 12px 16px;
-    outline: none;
-    transition: border 0.2s;
-    letter-spacing: 0.04em;
-  }
-  .api-key-input:focus { border-color: var(--accent3); }
-  .api-key-input::placeholder { color: var(--muted); }
-  .btn-save-key {
-    background: var(--accent3);
-    color: #fff;
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 12px 18px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .btn-save-key:hover { opacity: 0.85; }
-  .key-status { margin-top: 10px; font-size: 0.65rem; letter-spacing: 0.08em; display: none; }
-  .key-status.ok  { display: block; color: var(--accent); }
-  .key-status.err { display: block; color: var(--accent2); }
-  .key-note { margin-top: 10px; font-size: 0.62rem; color: var(--muted); line-height: 1.6; }
-
-  .error-box {
-    display: none;
-    background: rgba(255,51,102,0.08);
-    border: 1px solid var(--accent2);
-    padding: 18px;
-    font-size: 0.78rem;
-    color: var(--accent2);
-    margin-top: 20px;
-    line-height: 1.7;
-  }
-  .error-box.show { display: block; }
-
-  footer {
-    text-align: center;
-    margin-top: 80px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-    font-size: 0.62rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  /* Sun Logo */
-  .sun-logo { display: flex; align-items: center; gap: 14px; }
-  .sun-svg-wrap { position: relative; width: 58px; height: 58px; flex-shrink: 0; }
-  .sun-svg { width: 58px; height: 58px; overflow: visible; }
-
-  .sun-core {
-    fill: #FFD700;
-    r: 0;
-    transform-origin: 29px 29px;
-    animation: coreGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s forwards;
-  }
-  @keyframes coreGrow { from{r:0;opacity:0} to{r:11;opacity:1} }
-
-  .sun-ray {
-    stroke: #FFD700;
-    stroke-linecap: round;
-    stroke-width: 2.5;
-    opacity: 0;
-    transform-origin: 29px 29px;
-  }
-  .sun-ray:nth-child(1) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.55s forwards; }
-  .sun-ray:nth-child(2) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.65s forwards; }
-  .sun-ray:nth-child(3) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.75s forwards; }
-  .sun-ray:nth-child(4) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.85s forwards; }
-  .sun-ray:nth-child(5) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 0.95s forwards; }
-  .sun-ray:nth-child(6) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.05s forwards; }
-  .sun-ray:nth-child(7) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.15s forwards; }
-  .sun-ray:nth-child(8) { animation: rayGrow 0.35s cubic-bezier(0.34,1.4,0.64,1) 1.25s forwards; }
-  @keyframes rayGrow {
-    0%   { opacity:0; stroke-dasharray:0 12; stroke-dashoffset:0; }
-    60%  { opacity:1; }
-    100% { opacity:1; stroke-dasharray:12 0; }
-  }
-
-  .sun-rays-group { transform-origin: 29px 29px; animation: sunSpin 18s linear 1.8s infinite; }
-  @keyframes sunSpin { to { transform: rotate(360deg); } }
-
-  .sun-core-anim {
-    transform-origin: 29px 29px;
-    animation: coreGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s forwards,
-               corePulse 3s ease-in-out 1.8s infinite;
-  }
-  @keyframes corePulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
-
-  .sun-svg-wrap::after {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-    background: #FFD700;
-    filter: blur(14px);
-    opacity: 0;
-    animation: glowIn 0.8s ease 1.4s forwards;
-    z-index: -1;
-  }
-  @keyframes glowIn { to { opacity: 0.28; } }
-
-  @media(max-width:600px){
-    .hero-tag { font-size: 2.2rem; }
-    header { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .sun-svg-wrap { width: 46px; height: 46px; }
-    .sun-svg { width: 46px; height: 46px; }
-  }
+/* ─── HOW TO USE ─── */
+.howto{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.howto-title{font-family:'Fira Code',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--sub);margin-bottom:10px;}
+.step{display:flex;gap:10px;margin-bottom:8px;font-size:13px;color:var(--sub);}
+.step:last-child{margin-bottom:0;}
+.step-n{
+  width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.step b{color:var(--text);}
 </style>
 </head>
 <body>
+<div class="shell">
 
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
+  <div class="hdr">
+    <div class="logo">Drop<em>Beam</em></div>
+    <div class="sub">phone ↔ pc · no signup needed</div>
+  </div>
 
-<div class="wrapper">
-  <header>
-    <div class="sun-logo">
-      <div class="sun-svg-wrap">
-        <svg class="sun-svg" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
-          <g class="sun-rays-group">
-            <line class="sun-ray" x1="29" y1="14" x2="29" y2="5"/>
-            <line class="sun-ray" x1="38.5" y1="19.5" x2="44.5" y2="13.5"/>
-            <line class="sun-ray" x1="44" y1="29" x2="53" y2="29"/>
-            <line class="sun-ray" x1="38.5" y1="38.5" x2="44.5" y2="44.5"/>
-            <line class="sun-ray" x1="29" y1="44" x2="29" y2="53"/>
-            <line class="sun-ray" x1="19.5" y1="38.5" x2="13.5" y2="44.5"/>
-            <line class="sun-ray" x1="14" y1="29" x2="5" y2="29"/>
-            <line class="sun-ray" x1="19.5" y1="19.5" x2="13.5" y2="13.5"/>
-          </g>
-          <circle class="sun-core sun-core-anim" cx="29" cy="29"/>
-        </svg>
+  <!-- HOW TO USE -->
+  <div class="howto" id="howto">
+    <div class="howto-title">How to use</div>
+    <div class="step"><div class="step-n">1</div><div>Open this page on <b>your PC</b> → choose <b>Receive</b> → press <b>Start Listening</b></div></div>
+    <div class="step"><div class="step-n">2</div><div>Open this page on <b>your phone/netbook</b> → choose <b>Send</b> → enter the <b>Room ID</b> shown on your PC</div></div>
+    <div class="step"><div class="step-n">3</div><div>Attach any file or type a message → hit <b>Send</b> — it appears on your PC instantly</div></div>
+  </div>
+
+  <!-- MODE -->
+  <div class="mode-row">
+    <button class="mode-btn active" id="btn-mode-send" onclick="setMode('send')">📤 Send</button>
+    <button class="mode-btn" id="btn-mode-recv" onclick="setMode('recv')">📥 Receive</button>
+  </div>
+
+  <!-- ═══ SEND PANEL ═══ -->
+  <div id="panel-send">
+    <div class="card">
+      <div class="card-title">Room ID (enter the code shown on your PC)</div>
+      <div class="room-row">
+        <input class="room-in" id="s-room" maxlength="12" placeholder="ABC123" spellcheck="false">
       </div>
-      <div>
-        <div class="logo"><span class="logo-typed" id="logoTyped"></span><span class="logo-cursor" id="logoCursor"></span></div>
-        <div class="logo-sub">Powered by K.A.I LABORATORIES</div>
+      <div id="s-pill" class="pill"><span class="dot"></span><span id="s-pill-txt">Not connected</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Attach a file (optional)</div>
+      <div class="dz" id="dz">
+        <input type="file" id="file-in" onchange="onFile(this.files[0])">
+        <span class="dz-icon">📎</span>
+        <div class="dz-text"><b>Tap to choose a file</b>or drag & drop</div>
       </div>
-    </div>
-    <div class="badge">● Live</div>
-  </header>
-
-  <h1 class="hero-tag">
-    Expose the<br>
-    <span class="line2">Reality.</span>
-  </h1>
-  <p class="hero-sub">
-    Upload any document, image, or paste text below.<br>
-    Our AI forensics engine will determine if it was generated by artificial intelligence.
-  </p>
-
-  <!-- API Key Panel -->
-  <div class="api-key-panel">
-    <div class="api-key-label">
-      🔑 Anthropic API Key
-      <a href="https://console.anthropic.com/settings/keys" target="_blank">Get your key →</a>
-    </div>
-    <div class="api-key-row">
-      <input class="api-key-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
-      <button class="btn-save-key" onclick="saveKey()">Save Key</button>
-    </div>
-    <div class="key-status" id="keyStatus"></div>
-    <div class="key-note">Your key is stored only in your browser's localStorage and never sent anywhere except directly to Anthropic's API.</div>
-  </div>
-
-  <!-- Upload Zone -->
-  <div class="upload-zone" id="dropZone">
-    <input type="file" id="fileInput" accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.md,.csv">
-    <span class="upload-icon">⬆</span>
-    <h3>Drop your file here</h3>
-    <p>Drag & drop or click to browse</p>
-    <div class="file-types">
-      <span class="ft-tag">TXT</span>
-      <span class="ft-tag">PDF</span>
-      <span class="ft-tag">PNG/JPG</span>
-      <span class="ft-tag">DOCX</span>
-      <span class="ft-tag">MD</span>
-      <span class="ft-tag">CSV</span>
-    </div>
-  </div>
-
-  <div class="file-preview" id="filePreview">
-    <span>📄</span>
-    <span class="fname" id="fileName"></span>
-    <span class="fsize" id="fileSize"></span>
-    <span class="remove-file" id="removeFile">✕</span>
-  </div>
-
-  <div class="divider">or paste text</div>
-
-  <textarea id="textInput" placeholder="Paste your text here for AI detection analysis...&#10;&#10;Works best with 100+ words of content."></textarea>
-
-  <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">
-    ⚡ Analyze Content
-  </button>
-
-  <div class="error-box" id="errorBox"></div>
-
-  <!-- Loader -->
-  <div class="loader-wrap" id="loader">
-    <div class="loader"></div>
-    <div class="loader-text" id="loaderText">Initializing forensics engine...</div>
-  </div>
-
-  <!-- Results -->
-  <div class="results" id="results">
-    <div class="result-header">
-      <span class="verdict-badge" id="verdictBadge">AI</span>
-      <div class="result-title" id="resultTitle">Likely AI-Generated</div>
-    </div>
-
-    <div class="confidence-wrap">
-      <div class="conf-label">
-        <span>AI Probability</span>
-        <span id="confPct">—</span>
-      </div>
-      <div class="conf-track">
-        <div class="conf-fill" id="confBar"></div>
+      <img class="img-pre" id="img-pre" alt="">
+      <div class="fbar" id="fbar">
+        <span class="fbar-icon" id="fbar-ico">📄</span>
+        <div class="fbar-info">
+          <div class="fbar-name" id="fbar-name"></div>
+          <div class="fbar-size" id="fbar-size"></div>
+        </div>
+        <button class="fbar-rm" onclick="clearFile()">✕</button>
       </div>
     </div>
 
-    <div class="signals" id="signalGrid"></div>
-
-    <div class="analysis-body">
-      <h4>Detailed Analysis</h4>
-      <div id="analysisText"></div>
+    <div class="card">
+      <div class="card-title">Message (optional)</div>
+      <textarea class="txa" id="s-msg" placeholder="Type anything here…"></textarea>
     </div>
 
-    <button class="btn-reset" onclick="resetApp()">↺ Analyze Another</button>
+    <div class="prog-wrap" id="prog-wrap">
+      <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="prog-lbl" id="prog-lbl">Sending…</div>
+    </div>
+
+    <button class="btn-main send-btn" id="btn-send" onclick="doSend()">⚡ Send to PC</button>
+    <div class="status-msg" id="s-status"></div>
   </div>
 
-  <footer>
-    Project Helios v1.0 — K.A.I Laboratories &nbsp;·&nbsp; Forensic AI Detection Engine
-  </footer>
+  <!-- ═══ RECEIVE PANEL ═══ -->
+  <div id="panel-recv" style="display:none;">
+    <div class="card">
+      <div class="card-title">Your Room ID — share this with the sender</div>
+      <div class="room-row">
+        <input class="room-in" id="r-room" readonly placeholder="Generating…" style="cursor:default;">
+        <button class="btn-sm" onclick="copyRoomId()">Copy</button>
+        <button class="btn-sm" onclick="newRoom()">New</button>
+      </div>
+      <div id="r-pill" class="pill wait"><span class="dot"></span><span id="r-pill-txt">Starting…</span></div>
+    </div>
+
+    <button class="btn-main recv-btn" id="btn-listen" onclick="toggleListen()">▶ Start Listening</button>
+    <div class="status-msg" id="r-status"></div>
+
+    <div style="height:18px;"></div>
+    <div class="inbox-hdr">
+      <span class="inbox-title">Inbox</span>
+      <span class="badge" id="inbox-count">0</span>
+      <button class="btn-clr" onclick="clearInbox()">Clear</button>
+    </div>
+    <div class="packets" id="packets">
+      <div class="empty-state" id="empty"><span>📭</span>Nothing yet. Start listening and send something from your phone.</div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-  // ─── API Key management ─────────────────────────────────────────────────────
-  function saveKey() {
-    const val = document.getElementById('apiKeyInput').value.trim();
-    const status = document.getElementById('keyStatus');
-    if (!val.startsWith('sk-ant-')) {
-      status.textContent = '⚠ Key must start with sk-ant-  — check and try again.';
-      status.className = 'key-status err';
-      return;
-    }
-    localStorage.setItem('helios_api_key', val);
-    status.textContent = '✓ Key saved. Ready to analyze.';
-    status.className = 'key-status ok';
-    // Mask display
-    document.getElementById('apiKeyInput').value = val.slice(0, 14) + '••••••••••••••••';
-  }
+// ─────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────
+let mode = 'send';
+let peer = null;
+let conn = null;         // sender side connection
+let recvPeer = null;     // receiver Peer instance
+let recvConns = [];      // receiver incoming connections
+let isListening = false;
+let selectedFile = null;
+let inboxCount = 0;
+let fileChunks = {};     // for chunked file transfer
 
-  function getKey() {
-    return localStorage.getItem('helios_api_key') || '';
-  }
+const CHUNK = 64 * 1024; // 64 KB chunks
 
-  // Load saved key on page open
-  (function loadSavedKey() {
-    const saved = getKey();
-    if (saved) {
-      document.getElementById('apiKeyInput').value = saved.slice(0, 14) + '••••••••••••••••';
-      const status = document.getElementById('keyStatus');
-      status.textContent = '✓ Saved key loaded. Ready to analyze.';
-      status.className = 'key-status ok';
-    }
-  })();
-
-  // ─── Logo typewriter ────────────────────────────────────────────────────────
-  const LOGO_TEXT = 'PROJECT HELIOS';
-  const logoTyped = document.getElementById('logoTyped');
-  const logoCursor = document.getElementById('logoCursor');
-  let li = 0;
-  const typeInterval = setInterval(() => {
-    logoTyped.textContent += LOGO_TEXT[li++];
-    if (li >= LOGO_TEXT.length) {
-      clearInterval(typeInterval);
-      setTimeout(() => logoCursor.classList.add('hide'), 1200);
-    }
-  }, 100);
-
-  // ─── State ──────────────────────────────────────────────────────────────────
-  let uploadedFile = null;
-  const loaderMessages = [
-    "Initializing forensics engine...",
-    "Scanning linguistic patterns...",
-    "Measuring entropy distribution...",
-    "Checking stylometric markers...",
-    "Analyzing semantic coherence...",
-    "Running perplexity analysis...",
-    "Comparing to AI fingerprints...",
-    "Generating verdict..."
-  ];
-
-  // ─── File handling ──────────────────────────────────────────────────────────
-  const dropZone   = document.getElementById('dropZone');
-  const fileInput  = document.getElementById('fileInput');
-  const filePreview = document.getElementById('filePreview');
-  const fileNameEl = document.getElementById('fileName');
-  const fileSizeEl = document.getElementById('fileSize');
-
-  function formatBytes(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
-    return (b/1048576).toFixed(1) + ' MB';
-  }
-
-  function setFile(f) {
-    uploadedFile = f;
-    fileNameEl.textContent = f.name;
-    fileSizeEl.textContent = formatBytes(f.size);
-    filePreview.classList.add('show');
-  }
-
-  fileInput.addEventListener('change', e => {
-    if (e.target.files[0]) setFile(e.target.files[0]);
-  });
-
-  document.getElementById('removeFile').onclick = () => {
-    uploadedFile = null;
-    fileInput.value = '';
-    filePreview.classList.remove('show');
-  };
-
-  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag'); });
-  dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag');
-    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
-  });
-
-  // ─── Read file as text / base64 ─────────────────────────────────────────────
-  function readFileAsText(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload  = () => res(r.result);
-      r.onerror = () => rej(new Error('File read failed'));
-      r.readAsText(file);
-    });
-  }
-
-  function readFileAsBase64(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload  = () => res(r.result.split(',')[1]);
-      r.onerror = () => rej(new Error('File read failed'));
-      r.readAsDataURL(file);
-    });
-  }
-
-  function isImageFile(file) {
-    return file.type.startsWith('image/');
-  }
-
-  // ─── Loader cycling ─────────────────────────────────────────────────────────
-  let loaderTimer = null;
-  function startLoader() {
-    const el = document.getElementById('loaderText');
-    let idx = 0;
-    el.textContent = loaderMessages[0];
-    loaderTimer = setInterval(() => {
-      idx = (idx + 1) % loaderMessages.length;
-      el.textContent = loaderMessages[idx];
-    }, 1600);
-  }
-  function stopLoader() {
-    clearInterval(loaderTimer);
-  }
-
-  // ─── Show / hide helpers ────────────────────────────────────────────────────
-  function showError(msg) {
-    const el = document.getElementById('errorBox');
-    el.textContent = msg;
-    el.classList.add('show');
-  }
-  function hideError() {
-    document.getElementById('errorBox').classList.remove('show');
-  }
-
-  // ─── Main analyze ───────────────────────────────────────────────────────────
-  async function analyze() {
-    hideError();
-
-    const apiKey = getKey();
-    if (!apiKey) {
-      showError('⚠ Please enter and save your Anthropic API key first.');
-      document.getElementById('apiKeyInput').focus();
-      return;
-    }
-
-    const textVal = document.getElementById('textInput').value.trim();
-
-    if (!uploadedFile && !textVal) {
-      showError('⚠ Please upload a file or paste some text before analyzing.');
-      return;
-    }
-
-    // UI → loading state
-    document.getElementById('analyzeBtn').disabled = true;
-    document.getElementById('results').classList.remove('show');
-    document.getElementById('loader').classList.add('show');
-    startLoader();
-
-    try {
-      let messages;
-
-      if (uploadedFile && isImageFile(uploadedFile)) {
-        // Image: send as vision message
-        const b64 = await readFileAsBase64(uploadedFile);
-        const mediaType = uploadedFile.type;
-        messages = [{
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType, data: b64 }
-            },
-            {
-              type: 'text',
-              text: buildPrompt('[IMAGE UPLOADED — analyze the image content]')
-            }
-          ]
-        }];
-      } else {
-        // Text or text-based file
-        let content = textVal;
-        if (uploadedFile) {
-          try { content = await readFileAsText(uploadedFile); }
-          catch { content = textVal || '(could not read file)'; }
-        }
-
-        messages = [{
-          role: 'user',
-          content: buildPrompt(content)
-        }];
-      }
-
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages
-        })
-      });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error?.message || `API error ${response.status}`);
-      }
-
-      const data = await response.json();
-      const raw  = data.content.map(b => b.text || '').join('');
-      const parsed = parseResponse(raw);
-      renderResults(parsed);
-
-    } catch (err) {
-      showError('⚠ Analysis failed: ' + err.message);
-    } finally {
-      stopLoader();
-      document.getElementById('loader').classList.remove('show');
-      document.getElementById('analyzeBtn').disabled = false;
-    }
-  }
-
-  // ─── Prompt builders ─────────────────────────────────────────────────────────
-  const SYSTEM_PROMPT = `You are an expert AI content forensics engine. Your job is to analyze text or images and determine the probability that they were AI-generated versus written/created by a human.
-
-You MUST respond ONLY in the following JSON format (no extra text, no markdown fences):
-{
-  "verdict": "AI" | "HUMAN" | "MIXED",
-  "ai_probability": <integer 0-100>,
-  "title": "<short verdict title>",
-  "signals": [
-    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" },
-    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" },
-    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" },
-    { "label": "<signal name>", "value": "<short value>", "color": "red" | "green" | "yellow" }
-  ],
-  "analysis": "<2-4 sentence detailed explanation of findings>"
+// ─────────────────────────────────────────────
+// Mode switch
+// ─────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.getElementById('panel-send').style.display = m === 'send' ? '' : 'none';
+  document.getElementById('panel-recv').style.display = m === 'recv' ? '' : 'none';
+  document.getElementById('btn-mode-send').classList.toggle('active', m === 'send');
+  document.getElementById('btn-mode-recv').classList.toggle('active', m === 'recv');
+  if (m === 'recv' && !recvPeer) initReceiver();
 }
 
-Rules:
-- verdict: "AI" if ai_probability >= 70, "HUMAN" if <= 35, otherwise "MIXED"
-- Signals should reflect real forensic markers: perplexity level, burstiness, vocabulary diversity, sentence uniformity, stylometric patterns, etc.
-- Use "red" color for signals pointing toward AI, "green" for human, "yellow" for ambiguous
-- Be specific and technical in the analysis field
-- For images, analyze visual patterns, metadata hints, AI-generation artifacts like smooth gradients, perfect symmetry, unusual textures, etc.`;
+// ─────────────────────────────────────────────
+// RECEIVER
+// ─────────────────────────────────────────────
+function initReceiver() {
+  const id = makeId();
+  document.getElementById('r-room').value = id;
+  setPill('r', 'wait', 'Connecting to relay…');
 
-  function buildPrompt(content) {
-    return `Please analyze the following content for AI detection:\n\n---\n${content.slice(0, 6000)}\n---\n\nProvide your forensic analysis in the specified JSON format.`;
+  recvPeer = new Peer(id, { debug: 0 });
+
+  recvPeer.on('open', () => {
+    setPill('r', 'wait', 'Ready — waiting for sender');
+    setRStatus('Enter the Room ID on your phone then press Send', 'info');
+  });
+
+  recvPeer.on('connection', (c) => {
+    recvConns.push(c);
+    setPill('r', 'on', 'Sender connected!');
+    setRStatus('🟢 Sender connected', 'ok');
+
+    c.on('data', (raw) => {
+      handleIncoming(raw);
+    });
+    c.on('close', () => {
+      setPill('r', 'wait', 'Sender disconnected — waiting…');
+      setRStatus('Sender disconnected. You can still receive from another device.', '');
+    });
+    c.on('error', (e) => {
+      setRStatus('Connection error: ' + e, 'err');
+    });
+  });
+
+  recvPeer.on('error', (e) => {
+    setPill('r', 'err', 'Error: ' + e.type);
+    setRStatus('Relay error — try refreshing', 'err');
+  });
+
+  recvPeer.on('disconnected', () => {
+    setPill('r', 'err', 'Disconnected');
+    recvPeer.reconnect();
+  });
+}
+
+function newRoom() {
+  if (recvPeer) { recvPeer.destroy(); recvPeer = null; }
+  fileChunks = {};
+  initReceiver();
+}
+
+function copyRoomId() {
+  const v = document.getElementById('r-room').value;
+  if (!v) return;
+  navigator.clipboard.writeText(v).then(() => {
+    setRStatus('Room ID copied! Paste it on your phone.', 'ok');
+    setTimeout(() => setRStatus('', ''), 3000);
+  });
+}
+
+// toggle — just for UI feedback, listener is always on once initiated
+function toggleListen() {
+  const btn = document.getElementById('btn-listen');
+  isListening = !isListening;
+  if (isListening) {
+    btn.textContent = '■ Stop Listening';
+    btn.classList.add('listening');
+    if (!recvPeer) initReceiver();
+    setRStatus('Listening for incoming packets…', 'info');
+  } else {
+    btn.textContent = '▶ Start Listening';
+    btn.classList.remove('listening');
+    setRStatus('Stopped.', '');
+  }
+}
+
+// ─────────────────────────────────────────────
+// SENDER
+// ─────────────────────────────────────────────
+function connectToRoom(roomId) {
+  if (peer) { peer.destroy(); peer = null; }
+  const myId = makeId();
+  peer = new Peer(myId, { debug: 0 });
+  peer.on('open', () => {
+    conn = peer.connect(roomId, { reliable: true });
+    setPill('s', 'wait', 'Connecting…');
+
+    conn.on('open', () => {
+      setPill('s', 'on', 'Connected to ' + roomId);
+      setSStatus('🟢 Connected — ready to send', 'ok');
+    });
+    conn.on('error', (e) => {
+      setPill('s', 'err', 'Connection error');
+      setSStatus('Error: ' + e, 'err');
+    });
+    conn.on('close', () => {
+      setPill('s', 'err', 'Disconnected');
+      setSStatus('Connection closed.', 'err');
+    });
+  });
+  peer.on('error', (e) => {
+    setPill('s', 'err', 'Peer error');
+    setSStatus('Error: ' + e.type + ' — check the Room ID', 'err');
+  });
+}
+
+document.getElementById('s-room').addEventListener('change', () => {
+  const v = document.getElementById('s-room').value.trim().toUpperCase();
+  document.getElementById('s-room').value = v;
+  if (v.length >= 4) connectToRoom(v);
+});
+document.getElementById('s-room').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const v = document.getElementById('s-room').value.trim().toUpperCase();
+    if (v.length >= 4) connectToRoom(v);
+  }
+});
+
+async function doSend() {
+  if (!conn || !conn.open) {
+    const room = document.getElementById('s-room').value.trim().toUpperCase();
+    if (!room) { setSStatus('Enter the Room ID from your PC first', 'err'); return; }
+    connectToRoom(room);
+    setSStatus('Connecting… try again in a moment', 'info');
+    return;
   }
 
-  // ─── Parse API response ──────────────────────────────────────────────────────
-  function parseResponse(raw) {
-    try {
-      // Strip possible markdown fences
-      const clean = raw.replace(/```json|```/g, '').trim();
-      return JSON.parse(clean);
-    } catch {
-      // Fallback: extract JSON object from anywhere in the string
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (match) return JSON.parse(match[0]);
-      throw new Error('Could not parse AI response. Please try again.');
+  const msg = document.getElementById('s-msg').value.trim();
+  const file = selectedFile;
+
+  if (!msg && !file) { setSStatus('Nothing to send — add text or a file', 'err'); return; }
+
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true;
+
+  try {
+    if (msg) {
+      conn.send({ type: 'text', ts: Date.now(), msg });
+    }
+
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) { setSStatus('File too large (max 50 MB)', 'err'); btn.disabled = false; return; }
+      await sendFileChunked(file);
+    }
+
+    btn.textContent = '✅ Sent!';
+    btn.classList.add('ok');
+    setSStatus('Delivered!', 'ok');
+
+    setTimeout(() => {
+      btn.textContent = '⚡ Send to PC';
+      btn.classList.remove('ok');
+      btn.disabled = false;
+      document.getElementById('s-msg').value = '';
+      clearFile();
+      setSStatus('', '');
+    }, 2500);
+
+  } catch(e) {
+    setSStatus('Send error: ' + e.message, 'err');
+    btn.disabled = false;
+    showProg(false);
+  }
+}
+
+async function sendFileChunked(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const buf = reader.result;
+      const total = Math.ceil(buf.byteLength / CHUNK);
+      const uid = Math.random().toString(36).slice(2);
+
+      // header
+      conn.send({ type: 'file-start', uid, name: file.name, mime: file.type, size: file.size, total });
+
+      showProg(true);
+      let i = 0;
+
+      function sendNext() {
+        if (i >= total) {
+          conn.send({ type: 'file-end', uid });
+          showProg(false);
+          resolve();
+          return;
+        }
+        const chunk = buf.slice(i * CHUNK, (i + 1) * CHUNK);
+        conn.send({ type: 'file-chunk', uid, index: i, data: chunk });
+        const pct = Math.round(((i + 1) / total) * 100);
+        document.getElementById('prog-fill').style.width = pct + '%';
+        document.getElementById('prog-lbl').textContent = `Sending ${file.name} — ${pct}%`;
+        i++;
+        // Use setTimeout to avoid blocking UI
+        setTimeout(sendNext, 1);
+      }
+      sendNext();
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ─────────────────────────────────────────────
+// INCOMING packet handling (receiver side)
+// ─────────────────────────────────────────────
+function handleIncoming(raw) {
+  if (!isListening) return; // ignore if stopped
+
+  if (raw.type === 'text') {
+    renderText(raw);
+    notifyNew('Message', raw.msg);
+  }
+  else if (raw.type === 'file-start') {
+    fileChunks[raw.uid] = { name: raw.name, mime: raw.mime, size: raw.size, total: raw.total, chunks: [] };
+  }
+  else if (raw.type === 'file-chunk') {
+    const fc = fileChunks[raw.uid];
+    if (fc) { fc.chunks[raw.index] = raw.data; }
+  }
+  else if (raw.type === 'file-end') {
+    const fc = fileChunks[raw.uid];
+    if (fc) {
+      const blob = new Blob(fc.chunks, { type: fc.mime });
+      renderFile(fc.name, fc.mime, blob);
+      notifyNew('File: ' + fc.name, fc.name);
+      delete fileChunks[raw.uid];
     }
   }
+}
 
-  // ─── Render results ──────────────────────────────────────────────────────────
-  function renderResults(d) {
-    const verdict      = (d.verdict || 'MIXED').toUpperCase();
-    const aiProb       = Math.max(0, Math.min(100, parseInt(d.ai_probability) || 50));
-    const title        = d.title || 'Analysis Complete';
-    const signals      = Array.isArray(d.signals) ? d.signals : [];
-    const analysis     = d.analysis || '';
+function renderText(data) {
+  removeEmpty();
+  inboxCount++;
+  document.getElementById('inbox-count').textContent = inboxCount;
 
-    // Verdict badge
-    const badge = document.getElementById('verdictBadge');
-    badge.textContent = verdict;
-    badge.className   = 'verdict-badge ' + verdict.toLowerCase();
+  const ts = new Date(data.ts);
+  const div = document.createElement('div');
+  div.className = 'pkt fresh';
+  const mid = 'msg-' + inboxCount;
+  const esc = data.msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  div.innerHTML = `
+    <div class="pkt-top"><span class="pkt-ico">💬</span><span class="pkt-time">${fmtTime(ts)}</span><span class="pkt-new">NEW</span></div>
+    <div class="pkt-msg" id="${mid}">${esc}</div>
+    <button class="btn-cp" onclick="cpText('${mid}',this)">📋 Copy</button>
+  `;
+  document.getElementById('packets').prepend(div);
+  setTimeout(() => div.classList.remove('fresh'), 5000);
+}
 
-    document.getElementById('resultTitle').textContent = title;
+function renderFile(name, mime, blob) {
+  removeEmpty();
+  inboxCount++;
+  document.getElementById('inbox-count').textContent = inboxCount;
 
-    // Confidence bar
-    const confClass = verdict === 'AI' ? 'ai' : verdict === 'HUMAN' ? 'human' : 'mixed';
-    const bar       = document.getElementById('confBar');
-    bar.className   = 'conf-fill ' + confClass;
-    document.getElementById('confPct').textContent = aiProb + '%';
-    // Trigger animation after a tick
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => { bar.style.width = aiProb + '%'; });
-    });
+  const url = URL.createObjectURL(blob);
+  const isImg = mime && mime.startsWith('image/');
+  const ico = fileEmoji(mime);
 
-    // Signal cards
-    const grid = document.getElementById('signalGrid');
-    grid.innerHTML = '';
-    signals.forEach(s => {
-      const card = document.createElement('div');
-      card.className = 'signal-card ' + (s.color || 'yellow');
-      card.innerHTML = `<div class="s-label">${escHtml(s.label)}</div><div class="s-val">${escHtml(s.value)}</div>`;
-      grid.appendChild(card);
-    });
+  const div = document.createElement('div');
+  div.className = 'pkt fresh';
+  div.innerHTML = `
+    <div class="pkt-top"><span class="pkt-ico">${ico}</span><span class="pkt-time">${fmtTime(new Date())}</span><span class="pkt-new">NEW</span></div>
+    <div class="pkt-file">
+      <span class="pkt-file-ico">${ico}</span>
+      <div class="pkt-finfo">
+        <div class="pkt-fname">${escHtml(name)}</div>
+        <div class="pkt-ftype">${escHtml(mime)}</div>
+      </div>
+      <a class="btn-dl" href="${url}" download="${escHtml(name)}" target="_blank">⬇ Save</a>
+    </div>
+    ${isImg ? `<img class="pkt-img" src="${url}" alt="${escHtml(name)}" loading="lazy">` : ''}
+  `;
+  document.getElementById('packets').prepend(div);
+  setTimeout(() => div.classList.remove('fresh'), 5000);
+}
 
-    // Analysis text
-    document.getElementById('analysisText').textContent = analysis;
+// ─────────────────────────────────────────────
+// File picker
+// ─────────────────────────────────────────────
+window.onFile = function(file) {
+  if (!file) return;
+  selectedFile = file;
+  document.getElementById('fbar').classList.add('show');
+  document.getElementById('fbar-ico').textContent = fileEmoji(file.type);
+  document.getElementById('fbar-name').textContent = file.name;
+  document.getElementById('fbar-size').textContent = fmtSize(file.size);
 
-    // Show
-    document.getElementById('results').classList.add('show');
-    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const pre = document.getElementById('img-pre');
+  if (file.type.startsWith('image/')) {
+    pre.src = URL.createObjectURL(file);
+    pre.classList.add('show');
+  } else { pre.classList.remove('show'); }
+};
+
+window.clearFile = function() {
+  selectedFile = null;
+  document.getElementById('fbar').classList.remove('show');
+  document.getElementById('img-pre').classList.remove('show');
+  document.getElementById('file-in').value = '';
+};
+
+// drag & drop
+const dz = document.getElementById('dz');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]); });
+
+// ─────────────────────────────────────────────
+// Inbox controls
+// ─────────────────────────────────────────────
+window.clearInbox = function() {
+  document.querySelectorAll('.pkt').forEach(p => p.remove());
+  inboxCount = 0;
+  document.getElementById('inbox-count').textContent = '0';
+  document.getElementById('empty').style.display = '';
+};
+
+window.cpText = function(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+  });
+};
+
+function removeEmpty() {
+  const e = document.getElementById('empty');
+  if (e) e.style.display = 'none';
+}
+
+// ─────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────
+function notifyNew(title, body) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') Notification.requestPermission();
+  if (Notification.permission === 'granted') {
+    new Notification('DropBeam — ' + title, { body: String(body).slice(0, 80) });
   }
+}
 
-  // ─── Reset ───────────────────────────────────────────────────────────────────
-  function resetApp() {
-    uploadedFile = null;
-    fileInput.value = '';
-    document.getElementById('textInput').value = '';
-    document.getElementById('filePreview').classList.remove('show');
-    document.getElementById('results').classList.remove('show');
-    document.getElementById('confBar').style.width = '0%';
-    hideError();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
+function makeId() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return 'DB-' + Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
 
-  // ─── Utility ─────────────────────────────────────────────────────────────────
-  function escHtml(str) {
-    return String(str)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+function setPill(side, state, txt) {
+  const el = document.getElementById(side + '-pill');
+  const tEl = document.getElementById(side + '-pill-txt');
+  el.className = 'pill ' + state;
+  tEl.textContent = txt;
+}
+
+function setSStatus(txt, cls) {
+  const el = document.getElementById('s-status');
+  el.textContent = txt; el.className = 'status-msg ' + (cls||'');
+}
+function setRStatus(txt, cls) {
+  const el = document.getElementById('r-status');
+  el.textContent = txt; el.className = 'status-msg ' + (cls||'');
+}
+function showProg(show) {
+  document.getElementById('prog-wrap').classList.toggle('show', show);
+  if (!show) { document.getElementById('prog-fill').style.width = '0%'; }
+}
+function fmtTime(d) { return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+function fmtSize(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+function fileEmoji(t) {
+  if (!t) return '📄';
+  if (t.startsWith('image/')) return '🖼️';
+  if (t.startsWith('video/')) return '🎬';
+  if (t.startsWith('audio/')) return '🎵';
+  if (t.includes('pdf')) return '📕';
+  if (t.includes('zip')||t.includes('rar')||t.includes('7z')) return '🗜️';
+  if (t.includes('word')||t.includes('doc')) return '📝';
+  if (t.includes('sheet')||t.includes('excel')||t.includes('csv')) return '📊';
+  return '📄';
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 </script>
 </body>
 </html>
